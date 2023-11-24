@@ -1,0 +1,5 @@
+*pra ael overace
+
+*crear uno similar al axisview pero solo de 3 lineas
+y mas compacto, con eso veremos el salto entre los 3 
+tipos de digitos (over/6/under)

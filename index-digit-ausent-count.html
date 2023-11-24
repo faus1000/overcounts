@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Over AusCounter - Index V100</title>
+    <style>
+      body {
+        background-color: rgb(15, 10, 37);
+      }
+      .OverAusents {
+        display: flex;
+        flex-direction: column;
+      }
+      .overs {
+        color: rgb(255, 255, 255);
+        font-size: 24px;
+        display: flex;
+        flex-direction: row;
+      }
+      .cts {
+        color: aquamarine;
+        font-size: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div class="OverAusents">
+        <div class="overs" id="dg9">
+          9:
+        </div>
+        <div class="overs" id="dg8">8:</div>
+        <div class="overs" id="dg7">7:</div>
+        <div class="overs" id="dg6">6:</div>
+      </div>
+    </div>
+
+    <script>
+      var symbol = "R_100";
+      var decimals = 2;
+      var ws = new WebSocket("wss://ws.binaryws.com/websockets/v3?app_id=1089");
+
+      var co0 = 0;
+      var co1 = 0;
+      var co2 = 0;
+      var co3 = 0;
+      var co4 = 0;
+      var co5 = 0;
+      var co6 = 0;
+      var co7 = 0;
+      var co8 = 0;
+      var co9 = 0;
+      var AusData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+      ws.onopen = function (evt) {
+        ws.send(JSON.stringify({ ticks: symbol }));
+      };
+      ws.onmessage = function (msg) {
+        var data = JSON.parse(msg.data);
+        var digit = Number(data.tick.quote).toFixed(decimals).slice(-1);
+
+        console.log(digit);
+        if (digit == 8) {
+          AusData[8] = co8;
+          añadir(digit, co8);
+          co8 = 0;
+        } else {
+          co8++;
+        }
+        if (digit == 6) {
+          AusData[6] = co6;
+          añadir(digit, co6);
+          co6 = 0;
+        } else {
+          co6++;
+
+        }
+        if (digit == 4) {
+          AusData[4] = co4;
+          co4 = 0;
+        } else {
+          co4++;
+        }
+        if (digit == 2) {
+          AusData[2] = co2;
+          co2 = 0;
+        } else {
+          co2++;
+        }
+        if (digit == 0) {
+          AusData[0] = co0;
+          co0 = 0;
+        } else {
+          co0++;
+        }
+        if (digit == 1) {
+          AusData[1] = co1;
+          co1 = 0;
+        } else {
+          co1++;
+        }
+        if (digit == 3) {
+          AusData[3] = co3;
+          co3 = 0;
+        } else {
+          co3++;
+        }
+        if (digit == 5) {
+          AusData[5] = co5;
+          co5 = 0;
+        } else {
+          co5++;
+        }
+        if (digit == 7) {
+          AusData[7] = co7;
+          añadir(digit, co7);
+          co7 = 0;
+        } else {
+          co7++;
+        }
+        if (digit == 9) {
+          AusData[9] = co9;
+          añadir(digit, co6);
+          co9 = 0;
+        } else {
+          co9++;
+        }
+
+        console.log(
+          `siete:${AusData[7]}- ocho:${AusData[8]}- nueve:${AusData[9]}`
+        );
+
+        function añadir(digito, counter) {
+          //por ahora este contador cuenta desde el mismo digito al mismo
+          var ElConter = document.createElement("div");
+          ElConter.setAttribute("class", "cts");
+          if (digito == 9) {
+            ElConter.innerHTML = "-"+counter;
+            document.getElementById("dg9").appendChild(ElConter);
+          } else if (digito == 8) {
+            ElConter.innerHTML = "-"+counter;
+            document.getElementById("dg8").appendChild(ElConter);
+          } else if (digito == 7) {
+            ElConter.innerHTML = "-"+counter;
+            document.getElementById("dg7").appendChild(ElConter);
+          } else if (digito == 6) {
+            ElConter.innerHTML = "-"+counter;
+            document.getElementById("dg6").appendChild(ElConter);
+          }else{
+            console.log("contando");
+          }
+        }
+      };
+    </script>
+  </body>
+</html>

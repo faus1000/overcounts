@@ -1,0 +1,221 @@
+ 
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Over Over/under Distance - Index V100</title>
+    <script src="./main.js"></script>
+    <style>
+       /* width */
+       ::-webkit-scrollbar {
+        height: 6px;
+        width: 6px;
+        background-color: #0d0d1c;
+    }
+
+    /* Track */
+    ::-webkit-scrollbar-track {
+        box-shadow: transparent;
+        border-radius: 10px;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: rgba(39, 47, 53, 0.74);
+        border-radius: 10px;
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(131 , 145 , 155, 0.54);
+    }
+      body {
+        background-color: rgb(15, 10, 37);
+        overflow-y: hidden;
+      }
+      #container {
+        display: flex;
+        flex-direction: column; 
+        overflow-y: hidden;
+        overflow-x: auto; 
+        position: absolute;
+      }
+       
+      .overs {
+        color: rgb(255, 255, 255);
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;  
+      }
+
+      .empty {
+        width: 24px;
+        height:24px;
+        /*background-color: rgb(51, 121, 153);
+        color: darkgoldenrod;*/
+        font-size: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .over {
+        font-size: 20px;
+        width: 24px;
+        height: 24px;
+        background-color: rgb(0, 156, 70);
+        color: rgb(120, 240, 200);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .under {
+        font-size: 20px;
+        width: 24px;
+        height: 24px;
+        background-color: rgb(231, 65, 59);
+        color: rgb(245, 203, 198);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .six{
+        font-size: 20px;
+        width: 24px;
+        height: 24px;
+        background-color: rgb(153, 88, 51);
+        color: rgb(245, 225, 198);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div class="overs" id="overX"></div>
+      <div class="overs" id="underX"></div>
+        <div class="overs" id="dig"></div>
+    </div>
+
+   
+  </body>
+   <script>
+    
+      var out = document.body;
+      var symbol = "R_100";
+      var decimals = 2;
+      var ws = new WebSocket("wss://ws.binaryws.com/websockets/v3?app_id=1089");
+
+      var co6 = 0;
+      var cover = 0;
+      var cunder = 0;
+
+      ws.onopen = function (evt) {
+        ws.send(JSON.stringify({ ticks: symbol }));
+      };
+      ws.onmessage = function (msg) {
+        var data = JSON.parse(msg.data);
+        var isScrolledToBottom = out.scrollWidth - out.clientWidth <= out.scrollLeft + 1;
+        var digit = Number(data.tick.quote).toFixed(decimals).slice(-1);
+
+        if (digit > 6) {
+          console.log("hola mayor que 6");
+
+          var sConter = document.createElement("div");
+          sConter.setAttribute("class", "over");
+           var bxd = document.createElement("span");
+          var otext = document.createTextNode(cover);
+          bxd.appendChild(otext);
+          sConter.appendChild(bxd);
+
+          var boxDig = document.createElement("div");
+          var dtx = document.createElement("span");
+          var dt = document.createTextNode("0");
+          dtx.appendChild(dt);
+          boxDig.setAttribute("class", "empty");
+
+          var boxUnderX = document.createElement("div");
+          butx =  document.createElement("span");
+          var ut = document.createTextNode("0");
+          butx.appendChild(ut);
+          boxUnderX.setAttribute("class", "empty");
+
+          document.getElementById("overX").appendChild(sConter);
+          document.getElementById("dig").appendChild(boxDig);
+          document.getElementById("underX").appendChild(boxUnderX);
+
+          cover = 0;
+        } else {
+          cover++;
+        }
+
+        if (digit == 6) {
+          console.log("hola 6");
+
+          var sConter = document.createElement("div");
+          sConter.setAttribute("class", "six");
+           var bxd = document.createElement("span");
+          var otext = document.createTextNode(co6);
+          bxd.appendChild(otext);
+          sConter.appendChild(bxd);
+
+          var boxDig = document.createElement("div");
+          var dtx = document.createElement("span");
+          var dt = document.createTextNode("0");
+          dtx.appendChild(dt);
+          boxDig.setAttribute("class", "empty");
+
+          var boxUnderX = document.createElement("div");
+          butx =  document.createElement("span");
+          var ut = document.createTextNode("0");
+          butx.appendChild(ut);
+          boxUnderX.setAttribute("class", "empty");
+
+          document.getElementById("overX").appendChild(boxDig);
+          document.getElementById("dig").appendChild(sConter);
+          document.getElementById("underX").appendChild(boxUnderX);
+          co6 = 0;
+        } else {
+          co6++;
+        }
+
+        if (digit < 6) {
+          console.log("hola menor que 6");
+
+          var sConter = document.createElement("div");
+          sConter.setAttribute("class", "under");
+           var bxd = document.createElement("span");
+          var otext = document.createTextNode(cunder);
+          bxd.appendChild(otext);
+          sConter.appendChild(bxd);
+
+          var boxDig = document.createElement("div");
+          var dtx = document.createElement("span");
+          var dt = document.createTextNode("0");
+          dtx.appendChild(dt);
+          boxDig.setAttribute("class", "empty");
+
+          var boxUnderX = document.createElement("div");
+          butx =  document.createElement("span");
+          var ut = document.createTextNode("0");
+          butx.appendChild(ut);
+          boxUnderX.setAttribute("class", "empty");
+
+          document.getElementById("overX").appendChild(boxUnderX);
+          document.getElementById("dig").appendChild(boxDig);
+          document.getElementById("underX").appendChild(sConter);
+          cunder = 0;
+        } else {
+          cunder++;
+        }
+
+        if (isScrolledToBottom) {
+          out.scrollLeft = out.scrollWidth - out.clientWidth;
+          //  console.log("scroll desplazado al final");
+      } else {
+          //out.scrollLeft = out.scrollWidth - out.clientWidth;
+          //console.log("Se movio el scroll del borde");
+      }
+      };
+    </script>
+ 
