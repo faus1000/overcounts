@@ -1,249 +1,171 @@
- 
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Over/under Distances - Index V100</title>
-    <script src="./main.js"></script>
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatibles" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="./favicon.png">
+    <title>View System Over- V100</title>
     <style>
-       /* width */
-       ::-webkit-scrollbar {
-        height: 6px;
-        width: 6px;
-        background-color: #0d0d1c;
-    }
+         
+        body {
+            border: 0px;
+            padding: 0px;
+            margin: 0px;
+            overflow: hidden;
+        }
 
-    /* Track */
-    ::-webkit-scrollbar-track {
-        box-shadow: transparent;
-        border-radius: 10px;
-    }
 
-    /* Handle */
-    ::-webkit-scrollbar-thumb {
-        background: rgba(39, 47, 53, 0.74);
-        border-radius: 10px;
-    }
+        #container{ 
+            border: 0px;
+            padding: 0px;
+            margin:0px;
+            display: flex;   
+            flex-direction: column;  
+           
+            height: 100vh;
+        }
+        #dv{/* background-color: blue;*/
+           border: 0px;
+           padding: 0px;
+           margin:0px;
+           width: 100%;
+           height: 90%; 
 
-    /* Handle on hover */
-    ::-webkit-scrollbar-thumb:hover {
-        background: rgba(131 , 145 , 155, 0.54);
-    }
-      body {
-        background-color: rgb(15, 10, 37);
-        overflow-y: hidden;
-      }
-      #container {
-        display: flex;
-        flex-direction: column; 
-        overflow-y: hidden;
-        overflow-x: auto; 
-        position: absolute;
-      }
+        }
+        #gv{/*background-color: green;*/
+            flex: 1;
+            border: 0px;
+           padding: 0px;
+           margin:0px; 
+           width: 100%;
+           height: 100%;
+           bottom: 0px; 
+        }
+        .resizer {
+            background-color:#293644;
+            cursor: ns-resize;
+            height: 3px;
+            width: 100%;
+        }
+
+        
+/**/
+        #idv {
+
+            border: 0px;
+            width: 100%;
+            height: 100%;
+            padding: 0px;
+            margin: 0px;
+
+        }
+
+        #igv {
+            border: 0px;
+            width: 100%;
+            height: 100%;
+
+            height: 100%;
+
+        }
+
+      
        
-      .overs {
-        color: rgb(255, 255, 255);
-        display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;  
-      }
-
-      .empty {
-        font-size: 22px;
-        width: 26px;
-        height: 26px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      .over {
-        font-size: 22px;
-        width: 26px;
-        height: 26px;
-        background-color: rgb(0, 156, 70);
-        color: rgb(146, 245, 212);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      .under {
-        font-size: 22px;
-        width: 26px;
-        height: 26px;
-        background-color: rgb(231, 65, 59);
-        color: rgb(245, 203, 198);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      .six{
-        font-size: 22px;
-        width: 26px;
-        height: 26px;
-        background-color: rgb(153, 88, 51);
-        color: rgb(245, 225, 198);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-
-      .inSide{
-        font-size: 14px; 
-        color: #2bfdec;
-        transform: translate(2px ,-6px);
-      }
-     
-
     </style>
-  </head>
-  <body>
+</head>
+
+<body>
     <div id="container">
-      <div class="overs" id="overX">
-        
-      </div>
-      <div class="overs" id="underX">
-       
-        
-      </div>
-        <div class="overs" id="dig"></div>
+
+        <div id="dv">
+            <!-- <iframe id="idv" src="./dc.html"></iframe> -->
+            <!-- <iframe id="idv" src="https://faus1000.github.io/digitCount/"></iframe> -->
+            <iframe id="idv" src="./index-over2.html"></iframe>
+        </div>
+        <div class="resizer" id="dragMe"></div>
+        <div id="gv">
+           <iframe id="igv" src="./overCounter.html"></iframe>
+           <!-- <iframe id="igv" src="https://faus1000.github.io/gtrack/"></iframe> -->
+        </div>
+
     </div>
+    <script>
+        // Query the element
+        const resizer = document.getElementById('dragMe');
+        const leftSide = resizer.previousElementSibling;
+        const rightSide = resizer.nextElementSibling;
 
-   
-  </body>
-   <script>
-    
-      var out = document.body;
-      var symbol = "R_100";
-      var decimals = 2;
-      var ws = new WebSocket("wss://ws.binaryws.com/websockets/v3?app_id=1089");
+        const prevSibling = resizer.previousElementSibling;
+        let prevSiblingHeight = 0;
 
-      var co6 = 0;
-      var cover = 0;
-      var cunder = 0;
+        // The current position of mouse
+        let x = 0;
+        let y = 0;
+        let leftWidth = 0;
 
-      ws.onopen = function (evt) {
-        ws.send(JSON.stringify({ ticks: symbol }));
-      };
-      ws.onmessage = function (msg) {
-        var data = JSON.parse(msg.data);
-        var isScrolledToBottom = out.scrollWidth - out.clientWidth <= out.scrollLeft + 1;
-        var digit = Number(data.tick.quote).toFixed(decimals).slice(-1);
+        // Handle the mousedown event
+        // that's triggered when user drags the resizer
+        const mouseDownHandler = function (e) {
+            // Get the current mouse position
+            x = e.clientX;
+            y = e.clientY;
+            // leftWidth = leftSide.getBoundingClientRect().width;
 
-        if (digit > 6) {
-          console.log("hola mayor que 6");
+            const rect = prevSibling.getBoundingClientRect();
+            prevSiblingHeight = rect.height;
 
-          var initem = document.createElement("div")
-          initem.setAttribute("class","inSide");
-          var intext = document.createTextNode(digit);
-          initem.appendChild(intext)
+            // Attach the listeners to `document`
+            document.addEventListener('mousemove', mouseMoveHandler);
+            document.addEventListener('mouseup', mouseUpHandler);
+        };
 
-          var sConter = document.createElement("div");
-          sConter.setAttribute("class", "over");
-           var bxd = document.createElement("span");
-          var otext = document.createTextNode(cover);
-          bxd.appendChild(otext);
-          sConter.appendChild(bxd);
-          sConter.appendChild(initem);
+        const mouseMoveHandler = function (e) {
+            // How far the mouse has been moved
+            const dx = e.clientX - x;
+            const dy = e.clientY - y;
 
-          var boxDig = document.createElement("div");
-          var dtx = document.createElement("span");
-          var dt = document.createTextNode("0");
-          dtx.appendChild(dt);
-          boxDig.setAttribute("class", "empty");
+            // const newLeftWidth = ((leftWidth + dx) * 100) / resizer.parentNode.getBoundingClientRect().width;
+            //leftSide.style.width = `${newLeftWidth}%`;
 
-          var boxUnderX = document.createElement("div");
-          butx =  document.createElement("span");
-          var ut = document.createTextNode("0");
-          butx.appendChild(ut);
-          boxUnderX.setAttribute("class", "empty");
+            const h = ((prevSiblingHeight + dy) * 100) / resizer.parentNode.getBoundingClientRect().height;
+            prevSibling.style.height = `${h}%`;
+            /*
+                      resizer.style.cursor = 'col-resize';
+                      document.body.style.cursor = 'col-resize';*/
 
-          document.getElementById("overX").appendChild(sConter);
-          document.getElementById("dig").appendChild(boxDig);
-          document.getElementById("underX").appendChild(boxUnderX);
+            leftSide.style.userSelect = 'none';
+            leftSide.style.pointerEvents = 'none';
 
-          cover = 0;
-        } else {
-          cover++;
-        }
+            rightSide.style.userSelect = 'none';
+            rightSide.style.pointerEvents = 'none';
+            /**/
+            resizer.style.cursor = 'row-resize';
+            document.body.style.cursor = 'row-resize';
+        };
 
-        if (digit == 6) {
-          console.log("hola 6");
+        const mouseUpHandler = function () {
+            /**/
+            resizer.style.removeProperty('cursor');
+            document.body.style.removeProperty('cursor');
 
-          var initem = document.createElement("div")
-          initem.setAttribute("class","inSide");
-          var intext = document.createTextNode(digit);
-          initem.appendChild(intext)
+            leftSide.style.removeProperty('user-select');
+            leftSide.style.removeProperty('pointer-events');
 
-          var sConter = document.createElement("div");
-          sConter.setAttribute("class", "six");
-           var bxd = document.createElement("span");
-          var otext = document.createTextNode(co6);
-          bxd.appendChild(otext);
-          sConter.appendChild(bxd);
-          sConter.appendChild(initem);
+            rightSide.style.removeProperty('user-select');
+            rightSide.style.removeProperty('pointer-events');
 
-          var boxDig = document.createElement("div");
-          var dtx = document.createElement("span");
-          var dt = document.createTextNode("0");
-          dtx.appendChild(dt);
-          boxDig.setAttribute("class", "empty");
+            // Remove the handlers of `mousemove` and `mouseup`
+            document.removeEventListener('mousemove', mouseMoveHandler);
+            document.removeEventListener('mouseup', mouseUpHandler);
+        };
 
-          var boxUnderX = document.createElement("div");
-          butx =  document.createElement("span");
-          var ut = document.createTextNode("0");
-          butx.appendChild(ut);
-          boxUnderX.setAttribute("class", "empty");
-
-          document.getElementById("overX").appendChild(boxDig);
-          document.getElementById("dig").appendChild(sConter);
-          document.getElementById("underX").appendChild(boxUnderX);
-          co6 = 0;
-        } else {
-          co6++;
-        }
-
-        if (digit < 6) {
-          console.log("hola menor que 6");
-
-          var initem = document.createElement("div")
-          initem.setAttribute("class","inSide");
-          var intext = document.createTextNode(digit);
-          initem.appendChild(intext)
-
-          var sConter = document.createElement("div");
-          sConter.setAttribute("class", "under");
-           var bxd = document.createElement("span");
-          var otext = document.createTextNode(cunder);
-          bxd.appendChild(otext);
-          sConter.appendChild(bxd);
-          sConter.appendChild(initem);
-
-          var boxDig = document.createElement("div");
-          var dtx = document.createElement("span");
-          var dt = document.createTextNode("0");
-          dtx.appendChild(dt);
-          boxDig.setAttribute("class", "empty");
-
-          var boxUnderX = document.createElement("div");
-          butx =  document.createElement("span");
-          var ut = document.createTextNode("0");
-          butx.appendChild(ut);
-          boxUnderX.setAttribute("class", "empty");
-
-          document.getElementById("overX").appendChild(boxUnderX);
-          document.getElementById("dig").appendChild(boxDig);
-          document.getElementById("underX").appendChild(sConter);
-          cunder = 0;
-        } else {
-          cunder++;
-        }
-
-        if (isScrolledToBottom) {
-          out.scrollLeft = out.scrollWidth - out.clientWidth;
-          //  console.log("scroll desplazado al final");
-      } else {
-          //out.scrollLeft = out.scrollWidth - out.clientWidth;
-          //console.log("Se movio el scroll del borde");
-      }
-      };
+        // Attach the handler
+        resizer.addEventListener('mousedown', mouseDownHandler);
     </script>
- 
+
+
+</body>
+
+</html>
